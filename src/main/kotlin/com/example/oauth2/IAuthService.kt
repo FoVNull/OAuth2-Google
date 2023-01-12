@@ -4,4 +4,6 @@ interface IAuthService {
     fun ping(msg: String): String
     
     fun authGooglePeople(): String
+    
+    fun accessGooglePeople(authCode: String): String
 }

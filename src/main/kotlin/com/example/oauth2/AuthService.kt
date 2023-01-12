@@ -3,7 +3,6 @@ package com.example.oauth2
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.auth.oauth2.TokenResponse
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
@@ -32,7 +31,7 @@ class AuthService: IAuthService{
      * Global instance of the scopes required by this quickstart.
      * If modifying these scopes, delete your previously saved tokens/ folder.
      */
-    private val SCOPES: List<String> = Arrays.asList(PeopleServiceScopes.USERINFO_PROFILE)
+    private val SCOPES: List<String> = listOf(PeopleServiceScopes.USERINFO_PROFILE)
     
     override fun ping(msg: String): String {
         return "Got '$msg'. Greeting from server"
@@ -46,7 +45,7 @@ class AuthService: IAuthService{
      * @throws IOException If the credentials.json file cannot be found.
      */
     @Throws(IOException::class)
-    private fun getAccessCredential(HTTP_TRANSPORT: NetHttpTransport): Credential {
+    private fun getAccessCredential(HTTP_TRANSPORT: NetHttpTransport): String{
         // Load client secrets.
         val inStream: InputStream = ClassPathResource("static/credentials.json").inputStream
         val clientSecrets: GoogleClientSecrets = GoogleClientSecrets.load(JSON_FACTORY, InputStreamReader(inStream))
@@ -54,54 +53,76 @@ class AuthService: IAuthService{
         // Build flow and trigger user authorization request.
         val flow: GoogleAuthorizationCodeFlow = GoogleAuthorizationCodeFlow.Builder(
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(FileDataStoreFactory(File(TOKENS_DIRECTORY_PATH)))
+                .setDataStoreFactory(FileDataStoreFactory(File(TOKENS_DIRECTORY_PATH))) // store token info
                 .setAccessType("offline")
                 .build()
-        val receiver = LocalServerReceiver.Builder().setPort(8081).build()
-
-        val redirectUri: String = receiver.redirectUri
-        val authorizationUrl: AuthorizationCodeRequestUrl = flow.newAuthorizationUrl().setRedirectUri(redirectUri)
+        
+        val authorizationUrl: AuthorizationCodeRequestUrl = flow.newAuthorizationUrl().setRedirectUri("http://localhost:8080/auth/goopeople")
         val credentialURL = authorizationUrl.build()
+        /*
+        https://accounts.google.com/o/oauth2/auth?access_type=offline
+        &client_id=${}
+        &redirect_uri=http://localhost:8080/auth/goopeople
+        &response_type=code
+        &scope=https://www.googleapis.com/auth/userinfo.profile
+         */
 
         // launch browser, get authorization code, login with google account
         val runtime = Runtime.getRuntime()
-        runtime.exec("open $credentialURL")
-        val authCode: String = receiver.waitForCode()
-
-        val tokenRequest: GoogleAuthorizationCodeTokenRequest = flow.newTokenRequest(authCode).setRedirectUri(redirectUri)
-        /* 
-        tokenRequest.execute() get response:
-        {
-         "access_token": "...",
-	     "expires_in": 3599,
-	     "refresh_token": "...",
-	     "scope": "https://www.googleapis.com/auth/contacts.readonly",
-	     "token_type": "Bearer"
-	     }
-         */
-        // request code at com.google.api.client.auth.oauth2.TokenRequest.executeUnparsed(TokenRequest.java:304) 
-        val tokenResponse: TokenResponse = tokenRequest.execute()
-        return flow.createAndStoreCredential(tokenResponse, "author")
+        // runtime.exec("open $credentialURL")
+        
+        return credentialURL
     }
     
     private fun getPeopleInfo(credential: Credential, HTTP_TRANSPORT: NetHttpTransport): String{
+        val x = PeopleService.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
         val service: PeopleService = PeopleService.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                                         .setApplicationName(APPLICATION_NAME)
                                         .build()
 
         val response: Person = service.people().get("people/me")
-                .setPersonFields("names,emailAddresses")
+                .setPersonFields("names")
                 .execute()
-        return response.names.toString()
+        
+        
+        return "name_info: ${response.names}"
     }
 
     @Throws(IOException::class, GeneralSecurityException::class)
     override fun authGooglePeople(): String {
         // Build a new authorized API client service.
         val httpTransport: NetHttpTransport = GoogleNetHttpTransport.newTrustedTransport()
-        val credential: Credential = getAccessCredential(httpTransport)
-        
+        return getAccessCredential(httpTransport)
+    }
 
+    override fun accessGooglePeople(authCode:String): String {
+        val httpTransport: NetHttpTransport = GoogleNetHttpTransport.newTrustedTransport()
+        // Load client secrets.
+        val inStream: InputStream = ClassPathResource("static/credentials.json").inputStream
+        val clientSecrets: GoogleClientSecrets = GoogleClientSecrets.load(JSON_FACTORY, InputStreamReader(inStream))
+        
+        // Build flow and trigger user authorization request.
+        val flow: GoogleAuthorizationCodeFlow = GoogleAuthorizationCodeFlow.Builder(
+                httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
+                .setDataStoreFactory(FileDataStoreFactory(File(TOKENS_DIRECTORY_PATH)))
+                .setAccessType("offline")
+                .build()
+
+        val tokenRequest: GoogleAuthorizationCodeTokenRequest = flow.newTokenRequest(authCode).setRedirectUri("http://localhost:8080/auth/goopeople")
+        /* 
+        tokenRequest.execute() get response:
+        {
+         "access_token": "...",
+	     "expires_in": 3599,
+	     "refresh_token": "...",
+	     "scope": "https://www.googleapis.com/auth/userinfo.profile",
+	     "token_type": "Bearer"
+	     }
+         */
+        // request code at com.google.api.client.auth.oauth2.TokenRequest.executeUnparsed(TokenRequest.java:304)
+        val tokenResponse: TokenResponse = tokenRequest.execute()
+        val credential: Credential  = flow.createAndStoreCredential(tokenResponse, "author")
+        
         return getPeopleInfo(credential, httpTransport)
     }
 

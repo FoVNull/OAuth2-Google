@@ -1,5 +1,6 @@
 package com.example.oauth2
 
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Controller
@@ -28,8 +29,14 @@ class AuthController {
     }
     
     @RequestMapping("/auth/goocloud")
-    fun authGooCloud(model: Model): String{
-        model.addAttribute("profile_info", authService.authGooglePeople())
+    fun authGooCloud(response: HttpServletResponse){
+        response.sendRedirect(authService.authGooglePeople())
+    }
+
+    @RequestMapping("/auth/goopeople")
+    fun authGooPeople(@RequestParam(required = false) code: String, @RequestParam(required = false) scope: String,
+                      model: Model): String{
+        model.addAttribute("profile_info", authService.accessGooglePeople(code))
         return "index"
     }
 }

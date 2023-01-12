@@ -26,7 +26,6 @@ dependencies {
     implementation("com.google.api-client:google-api-client:2.1.2")
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
     implementation("com.google.apis:google-api-services-people:v1-rev20230103-2.0.0")
-    implementation("org.apache.commons:commons-lang3:3.12.0")
 }
 
 tasks.withType<KotlinCompile> {
