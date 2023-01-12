@@ -57,3 +57,14 @@ https://oauth2.googleapis.com/token?code=***
 > Then send request to `https://people.googleapis.com/`. *I had some troubles about unwrap the SDK here, so I can't specify the parameters of request :(*   
 > I only get name information.   
 > <img src="image/res.png" width=600>  
+
+## Exception
+> If the exception `PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target` occurs.  
+> First disable the netskope client  
+> <img src="image/netskope.png" width=100>  
+> If it makes nonsense, add the SSL certificate:
+```
+$JAVA_HOME/bin/keytool -import -alias ${name} 
+    -keystore $JAVA_HOME/lib/security/cacerts -file upload.video.google.com.cer
+```
+> `upload.video.google.com.cer` in the resources folder
