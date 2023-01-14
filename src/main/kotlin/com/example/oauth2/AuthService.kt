@@ -68,22 +68,23 @@ class AuthService: IAuthService{
          */
 
         // launch browser, get authorization code, login with google account
-        val runtime = Runtime.getRuntime()
+        // val runtime = Runtime.getRuntime()
         // runtime.exec("open $credentialURL")
         
         return credentialURL
     }
     
     private fun getPeopleInfo(credential: Credential, HTTP_TRANSPORT: NetHttpTransport): String{
-        val x = PeopleService.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
         val service: PeopleService = PeopleService.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                                         .setApplicationName(APPLICATION_NAME)
                                         .build()
+        
+//        val serviceReq: PeopleService.People.Get? = service.people().get("people/me").setPersonFields("names")
+//        println(serviceReq?.requestHeaders)
 
         val response: Person = service.people().get("people/me")
                 .setPersonFields("names")
                 .execute()
-        
         
         return "name_info: ${response.names}"
     }
@@ -121,9 +122,15 @@ class AuthService: IAuthService{
          */
         // request code at com.google.api.client.auth.oauth2.TokenRequest.executeUnparsed(TokenRequest.java:304)
         val tokenResponse: TokenResponse = tokenRequest.execute()
+        // println(tokenResponse.accessToken)
         val credential: Credential  = flow.createAndStoreCredential(tokenResponse, "author")
         
         return getPeopleInfo(credential, httpTransport)
+    }
+    
+    // OpenID
+    // refer: https://developers.google.com/identity/openid-connect/openid-connect#getcredentials
+    fun authID(){
     }
 
 }

@@ -38,3 +38,4 @@ out/
 
 src/main/resources/static/credentials.json
 src/main/resources/static/tokens
+src/main/resources/static/.DS_Store

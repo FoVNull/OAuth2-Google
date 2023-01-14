@@ -54,9 +54,37 @@ https://oauth2.googleapis.com/token?code=***
      "token_type": "Bearer"
  }
 ```
-> Then send request to `https://people.googleapis.com/`. *I had some troubles about unwrap the SDK here, so I can't specify the parameters of request :(*   
+# Access data
+> Then send request to endpoint `https://people.googleapis.com/`.  
+> Request URL:
+```
+https://people.googleapis.com/v1/people/me?personFields=names
+    &access_token=***
+```
 > I only get name information.   
-> <img src="image/res.png" width=600>  
+```
+{
+  "resourceName": "people/12345678",
+  "etag": "%EgUBAi43PRoEBw==",
+  "names": [
+    {
+      "metadata": {
+        "primary": true,
+        "source": {
+          "type": "PROFILE",
+          "id": "12345678"
+        },
+        "sourcePrimary": true
+      },
+      "displayName": "Zhen Shao",
+      "familyName": "Shao",
+      "givenName": "Zhen",
+      "displayNameLastFirst": "Shao, Zhen",
+      "unstructuredName": "Zhen Shao"
+    }
+  ]
+}
+```
 
 ## Exception
 > If the exception `PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target` occurs.  
