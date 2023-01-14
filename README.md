@@ -5,7 +5,7 @@ The demo of [yahoo-auth](https://github.com/Seo-4d696b75/yahoo-auth) is pretty n
 However, my phone number was banned by yahoo.   
 **<font color='#FF450'>I AM INNOCENT!</font>**  
 <img src="image/ImINNOCENT.png" width=200>  
-So I write a demo of google api.  
+So I write a demo of google api. Article: [kibela](https://moneyforward.kibe.la/notes/246633) 
 The google api SDK wrap most of the functions. I unwrap some logic from SDK to make it easier to understand.  
 
 ## Preparation
