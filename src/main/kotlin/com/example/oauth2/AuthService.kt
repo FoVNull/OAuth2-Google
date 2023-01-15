@@ -31,7 +31,7 @@ class AuthService: IAuthService{
      * Global instance of the scopes required by this quickstart.
      * If modifying these scopes, delete your previously saved tokens/ folder.
      */
-    private val SCOPES: List<String> = listOf(PeopleServiceScopes.USERINFO_PROFILE)
+    private val SCOPES: List<String> = listOf(PeopleServiceScopes.USERINFO_PROFILE, "openid")
     
     override fun ping(msg: String): String {
         return "Got '$msg'. Greeting from server"
@@ -45,7 +45,7 @@ class AuthService: IAuthService{
      * @throws IOException If the credentials.json file cannot be found.
      */
     @Throws(IOException::class)
-    private fun getAccessCredential(HTTP_TRANSPORT: NetHttpTransport): String{
+    private fun getAccessCredential(HTTP_TRANSPORT: NetHttpTransport, ifOIDC: Boolean): String{
         // Load client secrets.
         val inStream: InputStream = ClassPathResource("static/credentials.json").inputStream
         val clientSecrets: GoogleClientSecrets = GoogleClientSecrets.load(JSON_FACTORY, InputStreamReader(inStream))
@@ -57,8 +57,11 @@ class AuthService: IAuthService{
                 .setAccessType("offline")
                 .build()
         
-        val authorizationUrl: AuthorizationCodeRequestUrl = flow.newAuthorizationUrl().setRedirectUri("http://localhost:8080/auth/goopeople")
+        val authorizationUrl: AuthorizationCodeRequestUrl = 
+                if(ifOIDC) flow.newAuthorizationUrl().setRedirectUri("http://localhost:8080/auth/goopeopleOIDC").setState("demo_state")
+                else flow.newAuthorizationUrl().setRedirectUri("http://localhost:8080/auth/goopeople")
         val credentialURL = authorizationUrl.build()
+        // println(credentialURL)
         /*
         https://accounts.google.com/o/oauth2/auth?access_type=offline
         &client_id=${}
@@ -72,6 +75,13 @@ class AuthService: IAuthService{
         // runtime.exec("open $credentialURL")
         
         return credentialURL
+    }
+
+    @Throws(IOException::class, GeneralSecurityException::class)
+    override fun authGooglePeople(ifOIDC: Boolean): String {
+        // Build a new authorized API client service.
+        val httpTransport: NetHttpTransport = GoogleNetHttpTransport.newTrustedTransport()
+        return getAccessCredential(httpTransport, ifOIDC)
     }
     
     private fun getPeopleInfo(credential: Credential, HTTP_TRANSPORT: NetHttpTransport): String{
@@ -89,14 +99,7 @@ class AuthService: IAuthService{
         return "name_info: ${response.names}"
     }
 
-    @Throws(IOException::class, GeneralSecurityException::class)
-    override fun authGooglePeople(): String {
-        // Build a new authorized API client service.
-        val httpTransport: NetHttpTransport = GoogleNetHttpTransport.newTrustedTransport()
-        return getAccessCredential(httpTransport)
-    }
-
-    override fun accessGooglePeople(authCode:String): String {
+    override fun accessGooglePeople(authCode:String, ifOIDC: Boolean): String {
         val httpTransport: NetHttpTransport = GoogleNetHttpTransport.newTrustedTransport()
         // Load client secrets.
         val inStream: InputStream = ClassPathResource("static/credentials.json").inputStream
@@ -109,7 +112,9 @@ class AuthService: IAuthService{
                 .setAccessType("offline")
                 .build()
 
-        val tokenRequest: GoogleAuthorizationCodeTokenRequest = flow.newTokenRequest(authCode).setRedirectUri("http://localhost:8080/auth/goopeople")
+        val tokenRequest: GoogleAuthorizationCodeTokenRequest = 
+                if(ifOIDC) flow.newTokenRequest(authCode).setRedirectUri("http://localhost:8080/auth/goopeopleOIDC")
+                else flow.newTokenRequest(authCode).setRedirectUri("http://localhost:8080/auth/goopeople")
         /* 
         tokenRequest.execute() get response:
         {
@@ -122,15 +127,15 @@ class AuthService: IAuthService{
          */
         // request code at com.google.api.client.auth.oauth2.TokenRequest.executeUnparsed(TokenRequest.java:304)
         val tokenResponse: TokenResponse = tokenRequest.execute()
-        // println(tokenResponse.accessToken)
+        base64ToJson(tokenResponse["id_token"].toString())
         val credential: Credential  = flow.createAndStoreCredential(tokenResponse, "author")
         
         return getPeopleInfo(credential, httpTransport)
     }
     
-    // OpenID
-    // refer: https://developers.google.com/identity/openid-connect/openid-connect#getcredentials
-    fun authID(){
+    private fun base64ToJson(base64Token: String){
+        val chunks = base64Token.replace("\r\n", "").split(".")
+        println(String(org.apache.commons.codec.binary.Base64.decodeBase64(chunks[0]), Charsets.UTF_8))
+        println(String(org.apache.commons.codec.binary.Base64.decodeBase64(chunks[1]), Charsets.UTF_8))
     }
-
 }

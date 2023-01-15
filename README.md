@@ -1,4 +1,4 @@
-# OAuth2-Google
+# OAuth2-Google / OIDC
 
 
 The demo of [yahoo-auth](https://github.com/Seo-4d696b75/yahoo-auth) is pretty nice. Article: [kibela](https://moneyforward.kibe.la/notes/154599)  
@@ -7,6 +7,7 @@ However, my phone number was banned by yahoo.
 <img src="image/ImINNOCENT.png" width=200>  
 So I write a demo of google api. Article: [kibela](https://moneyforward.kibe.la/notes/246633) 
 The google api SDK wrap most of the functions. I unwrap some logic from SDK to make it easier to understand.  
+Additionally, I add the OIDC. [reference](https://developers.google.com/identity/openid-connect/openid-connect)
 
 ## Preparation
 > active api, set up app, get secret key... refer to [https://developers.google.com/people/v1/getting-started](https://developers.google.com/people/v1/getting-started)  
@@ -15,7 +16,7 @@ The google api SDK wrap most of the functions. I unwrap some logic from SDK to m
 
 ## Authorization
 > We can build a request url to get Access Token.   
-> AuthService.kt#Line 48: getAccessCredential()  
+> AuthService.kt: getAccessCredential()  
 > I build a `GoogleAuthorizationCodeRequestUrl` object
 > We can check the url text from `GoogleAuthorizationCodeRequestUrl` object after build, it looks like this:
 ```
@@ -25,6 +26,15 @@ https://accounts.google.com/o/oauth2/auth?access_type=offline
     &response_type=code
     &scope=https://www.googleapis.com/auth/userinfo.profile
 ```
+OIDC:   
+*`state` should include the value of the anti-forgery unique session token, as well as any other information needed to recover the context when the user returns to your application, e.g., the starting URL.*
+```
+https://accounts.google.com/o/oauth2/auth?access_type=offline
+    &client_id=${}
+    &redirect_uri=http://localhost:8080/auth/goopeopleOIDC&response_type=code
+    &scope=https://www.googleapis.com/auth/userinfo.profile%20openid
+    &state=demo_state
+```
 > Then we redirect to the url above⬆️   
 > Then User need to grant to our app  
 > <img src="image/login.png" width=200>  
@@ -33,9 +43,18 @@ https://accounts.google.com/o/oauth2/auth?access_type=offline
 http://localhost:8080/auth/goopeople?code=****************
     &scope=profile+https://www.googleapis.com/auth/userinfo.profile
 ```
+OIDC:    
+We need to check the state, to ensure that the user, not a malicious script, is making the request.  
+I check it in controller.  
+```
+http://localhost:8080/auth/goopeopleOIDC?state=demo_state
+    &code=****************
+    &scope=profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid
+    &authuser=1&prompt=consent
+```
 
 # Access token
-> AuthService.kt#Line 96: accessGooglePeople()  
+> AuthService.kt: accessGooglePeople()  
 > Build a `GoogleAuthorizationCodeTokenRequest`, we can check the request at `com.google.api.client.auth.oauth2.TokenRequest.executeUnparsed(TokenRequest.java:304)`  
 > Make request by SDK. The url looks may like
 ```
@@ -53,6 +72,18 @@ https://oauth2.googleapis.com/token?code=***
      "scope": "https://www.googleapis.com/auth/userinfo.profile",
      "token_type": "Bearer"
  }
+```
+> OIDC:  
+```
+{
+	"access_token": "...",
+	"expires_in": 3599,
+	"id_token": ${Base64},
+	"refresh_token": "...",
+	"scope": "https://www.googleapis.com/auth/userinfo.profile openid",
+	"token_type": "Bearer"
+}
+
 ```
 # Access data
 > Then send request to endpoint `https://people.googleapis.com/`.  
@@ -85,6 +116,9 @@ https://people.googleapis.com/v1/people/me?personFields=names
   ]
 }
 ```
+OIDC:  
+ID token decode:  AuthService.base64ToJson
+documentation: [https://developers.google.com/identity/openid-connect/openid-connect#obtainuserinfo](https://developers.google.com/identity/openid-connect/openid-connect#obtainuserinfo)
 
 ## Exception
 > If the exception `PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target` occurs.  

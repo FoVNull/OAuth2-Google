@@ -30,13 +30,25 @@ class AuthController {
     
     @RequestMapping("/auth/goocloud")
     fun authGooCloud(response: HttpServletResponse){
-        response.sendRedirect(authService.authGooglePeople())
+        response.sendRedirect(authService.authGooglePeople(ifOIDC = true))
+    }
+    
+    @RequestMapping("/auth/goopeople")
+    fun authGooPeople(@RequestParam(required = true) code: String, @RequestParam(required = true) scope: String,
+                      model: Model): String{
+        model.addAttribute("profile_info", authService.accessGooglePeople(code, ifOIDC = false))
+        return "index"
     }
 
-    @RequestMapping("/auth/goopeople")
-    fun authGooPeople(@RequestParam(required = false) code: String, @RequestParam(required = false) scope: String,
+    @RequestMapping("/auth/goopeopleOIDC")
+    fun authGooPeople(@RequestParam(required = true) code: String, @RequestParam(required = true) scope: String,
+                      @RequestParam(required = false) state: String,
                       model: Model): String{
-        model.addAttribute("profile_info", authService.accessGooglePeople(code))
+        // check state, ensure that the user, not a malicious script, is making the request.
+        if(state != "demo_state"){
+            throw Exception("state invalid")
+        }
+        model.addAttribute("profile_info", authService.accessGooglePeople(code, ifOIDC = true))
         return "index"
     }
 }
