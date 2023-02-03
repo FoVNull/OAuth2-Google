@@ -1,4 +1,4 @@
-# OAuth2-Google / OIDC
+# OAuth2-Google / OIDC 
 
 
 The demo of [yahoo-auth](https://github.com/Seo-4d696b75/yahoo-auth) is pretty nice. Article: [kibela](https://moneyforward.kibe.la/notes/154599)  
