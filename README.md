@@ -83,7 +83,6 @@ https://oauth2.googleapis.com/token?code=***
 	"scope": "https://www.googleapis.com/auth/userinfo.profile openid",
 	"token_type": "Bearer"
 }
-
 ```
 # Access data
 > Then send request to endpoint `https://people.googleapis.com/`.  
