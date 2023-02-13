@@ -6,16 +6,16 @@ name: Create a pull request for release.
 # or API.
 on:
   push:
-    branches: [ release ]
+    branches: 
+    - release
 
 jobs:
-  create-release-pr:
+  create-pr:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Create release pr
         run: gh pr create -B "master" -t "r2m_$(date +'%Y-%m-%d %H:%M:%S')" -b ""
         env:
           TZ: 'Asia/Tokyo'
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
