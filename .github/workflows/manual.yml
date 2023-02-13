@@ -37,6 +37,6 @@ jobs:
             - Confirm in #release_prod
             - test service
             - Monitoring #account_rollbar_v2
-          pr_template: ".githun/R2M_TEMPLATE.md"
+          pr_template: ".github/R2M_TEMPLATE.md"
           pr_draft: false
           github_token: ${{ secrets.GITHUB_TOKEN }}
