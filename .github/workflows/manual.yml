@@ -19,3 +19,4 @@ jobs:
         run: gh pr create -B "master" -t "r2m_$(date +'%Y-%m-%d %H:%M:%S')" -b ""
         env:
           TZ: 'Asia/Tokyo'
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
