@@ -1,13 +1,13 @@
 # This is a basic workflow that is manually triggered
 
-name: Create a pull request for release.
+name: r2m-pr2
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
 on:
   push:
-    branches: 
-    - release
+    branches:
+      - release
 
 jobs:
   create-pr:
@@ -15,8 +15,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Create release pr
-        run: gh pr create -B "master" -t "r2m_$(date +'%Y-%m-%d %H:%M:%S')" -b ""
+
+      - name: get date
         env:
           TZ: 'Asia/Tokyo'
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+      - name: Create r2m pr
+        env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr create -B "master" -t "r2m_${{steps.date.outputs.date}}" -b ""
