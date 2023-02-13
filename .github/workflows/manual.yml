@@ -18,6 +18,10 @@ jobs:
           TZ: 'Asia/Tokyo'
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d_%H:%M')"
+      
+      - name: get pr_number
+        id: pr
+        run: echo "::set-output name=pr_number::$(gh pr view --json number -q .number || echo "")"
 
       - uses: repo-sync/pull-request@v2
         name: create r2m pr
@@ -25,7 +29,7 @@ jobs:
           destination_branch: "main"
           pr_title: "r2m_${{steps.date.outputs.date}}"
           pr_body: |
-            PR: #$(echo $GITHUB_REF | sed -e 's/[^0-9]//g')
+            PR: #${{steps.pr.outputs.pr_number}}
             Author: @${{github.actor}}   
             ## Check List
             - [ ] stg test
