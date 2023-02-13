@@ -129,4 +129,3 @@ $JAVA_HOME/bin/keytool -import -alias ${name}
     -keystore $JAVA_HOME/lib/security/cacerts -file upload.video.google.com.cer
 ```
 > `upload.video.google.com.cer` in the resources folder
-.
