@@ -18,6 +18,10 @@ jobs:
           TZ: 'Asia/Tokyo'
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d_%H:%M')"
+      
+      - name: log latest commits
+        id: commit-list
+        run: echo "::set-output name=commits::git log --pretty=format:%s '${{github.event.before}}... ${{github.event.after}}'"
 
       - uses: repo-sync/pull-request@v2
         name: create r2m pr
@@ -25,8 +29,9 @@ jobs:
           destination_branch: "main"
           pr_title: "r2m_${{steps.date.outputs.date}}"
           pr_body: |
-            PR_URL(s): "${{github.event.pull_request.html_url}}" 
-            Author(s): @"${{github.actor}}" 
+            COMMIT_URL(s): ${{steps.commit-list.outputs.commits}}  
+            Author(s): @${{github.actor}}   
+            ## Check List
             - [ ] stg test
             ## Confirm after release
             - Announce in #account_web
