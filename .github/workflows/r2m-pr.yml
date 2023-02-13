@@ -22,4 +22,5 @@ jobs:
           COMMENT_URL: ${{github.event.pull_request.comments_url}}
         run: |
           git checkout release
-          .github/workflows/x2m.main.kts
+          git update-index --chmod=+x ./.github/workflows/x2m.main.kts
+          ./.github/workflows/x2m.main.kts
