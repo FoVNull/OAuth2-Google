@@ -25,7 +25,7 @@ jobs:
           destination_branch: "main"
           pr_title: "r2m_${{steps.date.outputs.date}}"
           pr_body: |
-            PR: ${{github.event.pull_request}}  
+            PR: #$(echo $GITHUB_REF | sed -e 's/[^0-9]//g')
             Author: @${{github.actor}}   
             ## Check List
             - [ ] stg test
