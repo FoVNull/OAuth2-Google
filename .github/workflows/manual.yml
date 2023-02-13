@@ -30,6 +30,7 @@ jobs:
           destination_branch: "main"
           pr_title: "r2m_${{steps.date.outputs.date}}"
           pr_body: |
+            PR:
             PR: #${{ github.event.number}}
             Author: @${{github.actor}}   
             ## Check List
