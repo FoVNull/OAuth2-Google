@@ -22,4 +22,4 @@ jobs:
           COMMENT_URL: ${{github.event.pull_request.comments_url}}
         run: |
           git checkout release
-          ./.github/workflows/x2m.main.kts
+          .github/x2m.main.kts
