@@ -22,7 +22,6 @@ jobs:
       - name: get pr_number
         id: pr
         run: 
-          echo ${{github.event.pull_request.number}}
           echo "::set-output name=prn::$(gh pr view --json number -q .number || echo "")"
 
       - uses: repo-sync/pull-request@v2
@@ -31,7 +30,7 @@ jobs:
           destination_branch: "main"
           pr_title: "r2m_${{steps.date.outputs.date}}"
           pr_body: |
-            PR: #${{steps.pr.outputs.prn}}
+            PR: #${{ github.event.number}}
             Author: @${{github.actor}}   
             ## Check List
             - [ ] stg test
