@@ -20,9 +20,9 @@ jobs:
         env:
           TZ: 'Asia/Tokyo'
         id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d_%h:%m')"
 
       - name: Create r2m pr
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr create -B "master" -t "r2m_${{steps.date.outputs.date}}" -b ""
+#        env:
+#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr create -B "master" -t "r2m_${{steps.date.outputs.date}}" -b "body"
