@@ -30,13 +30,12 @@ jobs:
           pr_title: "r2m_${{steps.date.outputs.date}}"
           pr_body: |
             PR_URL: ${{steps.open-pr.outputs.pr_url}} 
-            - [] stg test
+            - [ ] stg test
             ## リリース後確認
             - Announce in #account_web
             - release to prod
             - Confirm in #release_prod
             - test service
             - Monitoring #account_rollbar_v2
-          pr_template: ".github/R2M_TEMPLATE.md"
           pr_draft: false
           github_token: ${{ secrets.GITHUB_TOKEN }}
