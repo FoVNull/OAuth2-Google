@@ -1,0 +1,21 @@
+# This is a basic workflow that is manually triggered
+
+name: Create a pull request for release.
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  push:
+    branches: [ release ]
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create release pr
+        env:
+          TZ: 'Asia/Tokyo'
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr create -B "master" -t "r2m_$(date +'%Y-%m-%d %H:%M:%S')" -b ""
