@@ -9,7 +9,7 @@ jobs:
   r2m-pr:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Ruby 2.7
         uses: ruby/setup-ruby@v1
         with:
@@ -18,9 +18,10 @@ jobs:
         env:
           GIT_PR_RELEASE_BRANCH_PRODUCTION: master
           GIT_PR_RELEASE_BRANCH_STAGING: release
-          GIT_PR_RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_PR_RELEASE_TOKEN: ${{secrets.GITHUB_TOKEN}}
           GIT_PR_RELEASE_TEMPLATE: '.github/git-pr-release.erb'
         run: |
           gem install git-pr-release -v "0.6.0"
+          echo ${GITHUB_ACTOR} ${GIT_PR_RELEASE_TOKEN} ${GITHUB_REPOSITORY}
           git remote set-url origin "https://${GITHUB_ACTOR}:${GIT_PR_RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git-pr-release || echo "Done."
