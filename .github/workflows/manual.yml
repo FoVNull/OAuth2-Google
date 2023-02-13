@@ -21,7 +21,7 @@ jobs:
       
       - name: log latest commits
         id: commit-list
-        run: echo "::set-output name=commits::git log --pretty=format:%s '${{github.event.before}}... ${{github.event.after}}'"
+        run: echo "::set-output name=commits::$(git log --pretty=format:%s '${{github.event.before}}...${{github.event.after}}')"
 
       - uses: repo-sync/pull-request@v2
         name: create r2m pr
