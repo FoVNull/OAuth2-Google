@@ -20,10 +20,8 @@ jobs:
         run: echo "::set-output name=date::$(date +'%Y-%m-%d_%H:%M')"
       
       - name: log latest commits
-        BEFORE_REF: ${{github.event.before}}
-        AFTER_REF: ${{github.event.after}}
         id: commit-list
-        run: echo "::set-output name=commits::git log --pretty=format:%s "$BEFORE_REF...$AFTER_REF""
+        run: echo "::set-output name=commits::git log --pretty=format:%s '${{github.event.before}}... ${{github.event.after}}'"
 
       - uses: repo-sync/pull-request@v2
         name: create r2m pr
