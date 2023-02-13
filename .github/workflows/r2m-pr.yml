@@ -6,20 +6,21 @@ on:
       - release
 
 jobs:
-  build:
+  r2m-pr:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
+      - name: Set up Ruby 2.7
+        uses: ruby/setup-ruby@v1
         with:
-          fetch-depth: 0
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - name: Run Script
+          ruby-version: 2.7.2
+      - name: Execute git-pr-release (release -> master)
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          COMMENT_URL: ${{github.event.pull_request.comments_url}}
+          GIT_PR_RELEASE_BRANCH_PRODUCTION: master
+          GIT_PR_RELEASE_BRANCH_STAGING: release
+          GIT_PR_RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_PR_RELEASE_TEMPLATE: '.github/git-pr-release.erb'
         run: |
-          git checkout release
-          sudo ./.github/workflows/x2m.main.kts
+          gem install git-pr-release -v "0.6.0"
+          git remote set-url origin "https://${GITHUB_ACTOR}:${GIT_PR_RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git-pr-release || echo "Done."
