@@ -1,8 +1,9 @@
 name: r2m-pr
 
 on:
-  pull_request:
-    branches: [ master ]
+  push:
+    branches:
+      - release
 
 jobs:
   build:
